@@ -1,6 +1,5 @@
 import React from "react";
 
-
 const IconNoData = () => {
   return (
     <>
@@ -134,12 +133,10 @@ const IconNoData = () => {
           />
         </svg>
 
-
         <h4 className="opacity-50 font-normal capitalize">No record found</h4>
       </div>
     </>
   );
 };
-
 
 export default IconNoData;

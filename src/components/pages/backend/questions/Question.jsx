@@ -14,9 +14,11 @@ import { StoreContext } from "@/components/store/storeContext";
 
 const Question = () => {
   const { dispatch, store } = React.useContext(StoreContext);
+  const [itemEdit, setItemEdit] = React.useState(null);
 
   const handleAdd = () => {
     dispatch(setIsAdd(true));
+    setItemEdit(null);
   };
   return (
     <>
@@ -33,7 +35,7 @@ const Question = () => {
                   Add New
                 </button>
               </div>
-              <QuestionTable />
+              <QuestionTable setItemEdit={setItemEdit} />
             </div>
 
             <Footer />
@@ -44,7 +46,7 @@ const Question = () => {
       {store.error && <ModalError />}
       {store.success && <ToastSucess />}
 
-      {store.isAdd && <ModalAddQuestion />}
+      {store.isAdd && <ModalAddQuestion itemEdit={itemEdit}/>}
     </>
   );
 };

@@ -1,105 +1,173 @@
-import React from 'react'
-import TableLoader from '../partials/TableLoader'
-import IconServerError from '../partials/IconServerError'
-import Pills from '../partials/Pills'
-import { Archive, ArchiveRestore, FilePenLine,Trash2 } from 'lucide-react'
-import LoadMore from '../partials/LoadMore'
-import IconNoData from '../partials/IconNoData'
-import SpinnerTable from '../partials/spinners/SpinnerTable'
-import { StoreContext } from '@/components/store/storeContext'
-import { setIsAdd, setIsConfirm, setIsDelete } from '@/components/store/storeAction'
-import ModalDelete from '../partials/modals/ModalDelete'
-import ModalConfirm from '../partials/modals/ModalConfirm'
+import React from "react";
+import TableLoader from "../partials/TableLoader";
+import IconServerError from "../partials/IconServerError";
+import Pills from "../partials/Pills";
+import { Archive, ArchiveRestore, FilePenLine, Trash2 } from "lucide-react";
+import LoadMore from "../partials/LoadMore";
+import IconNoData from "../partials/IconNoData";
+import SpinnerTable from "../partials/spinners/SpinnerTable";
+import { StoreContext } from "@/components/store/storeContext";
+import {
+  setIsAdd,
+  setIsConfirm,
+  setIsDelete,
+} from "@/components/store/storeAction";
+import ModalDelete from "../partials/modals/ModalDelete";
+import ModalConfirm from "../partials/modals/ModalConfirm";
+import useQueryData from "@/components/custom-hook/useQueryData";
 
-const QuestionTable = () => {
-const {store, dispatch} = React.useContext(StoreContext);
-let counter = 1;
+const QuestionTable = ({ setItemEdit }) => {
+  const { store, dispatch } = React.useContext(StoreContext);
+  const [isActive, setIsActive] = React.useState(0);
+  const [id, setId] = React.useState(null);
+  const {
+    isLoading,
+    isFetching,
+    error,
+    data: result,
+  } = useQueryData(
+    `/v2/question`, // endpoint
+    "get", // method
+    "question"
+  );
 
-const handleDelete = () => {
+  let counter = 1;
+
+  const handleDelete = (item) => {
     dispatch(setIsDelete(true));
-};
-const handleRestore = () => {
+    setId(item.question_aid);
+  };
+  const handleRestore = (item) => {
     dispatch(setIsConfirm(true));
-};
-const handleArchive = () => {
+    setIsActive(1);
+    setId(item.question_aid);
+  };
+  const handleArchive = (item) => {
     dispatch(setIsConfirm(true));
-};
-const handleAdd = () => {
+    setIsActive(0);
+    setId(item.question_aid);
+  };
+  const handleEdit = (item) => {
     dispatch(setIsAdd(true));
-};
-
+    setItemEdit(item);
+  };
 
   return (
     <>
-    <div className="p-4 bg-secondary rounded-md mt-10 border border-line relative">
-                            {/* <SpinnerTable/> */}
-                        <div className="table-wrapper custom-scroll">
-                            {/* <TableLoader count={1} cols={4}/> */}
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Status</th>
-                                        <th className='w-[30%]'>Question</th>
-                                        <th>
+      <div className="p-4 bg-secondary rounded-md mt-10 border border-line relative">
+        {!isLoading || (isFetching && <SpinnerTable />)}{" "}
+        <div className="table-wrapper custom-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Status</th>
+                <th className="w-[30%]">Question</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {((isLoading && !isFetching) || result?.data.length === 0) && (
+                <tr>
+                  <td colSpan="100%">
+                    {isLoading ? (
+                      <TableLoader count={30} cols={6} />
+                    ) : (
+                      <IconNoData />
+                    )}
+                  </td>
+                </tr>
+              )}
 
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {/* <tr>
-                                        <td colSpan={100}>
-                                            <IconNoData/>
-                                           
-                                        </td>
-                                    </tr> */}
-                                    {/* <tr>
-                                    <td colSpan={100}>
-                                            
-                                            <IconServerError/>
-                                        </td>
-                                    </tr> */}
+              {error && (
+                <tr>
+                  <td colSpan="100%">
+                    <IconServerError />
+                  </td>
+                </tr>
+              )}
 
-                                 {Array.from(Array(6).keys()).map((i) => (                             
-                                 <tr key={i}>
-                                    <td>{counter++}.</td>
-                                    <td><Pills/></td>
-                                    <td>Question 1</td>
-                                    <td>
-                                        <ul className="table-action">
-                                            {true ? 
-                                            (<>                                            
-                                                <li><button className="tooltip" data-tooltip="Edit" onClick={() => handleAdd()}><FilePenLine /></button></li>
-                                                <li><button className="tooltip" data-tooltip="Archive" onClick={() => handleArchive()}><Archive /></button></li>
-                                            </>) : 
-                                            (<>
-                                            <li><button className="tooltip" data-tooltip="Restore" onClick={() => handleRestore()}><ArchiveRestore /></button></li>
-                                            <li>
-                                                <button className="tooltip" data-tooltip="Delete" onClick={handleDelete}><Trash2 /></button></li>
-                                            </>)}
-                                            
+              {result?.data.map((item, key) => {
+                return (
+                  <tr key={key}>
+                    <td>{counter++}.</td>
+                    <td>
+                      <Pills isActive={item.question_is_active} />
+                    </td>
+                    <td>{item.question_title}</td>
 
-                                           
+                    <td>
+                      <ul className="table-action ">
+                        {item.question_is_active ? (
+                          <>
+                            <li>
+                              <button
+                                className="tooltip"
+                                data-tooltip="Edit"
+                                onClick={() => handleEdit(item)}
+                              >
+                                <FilePenLine />
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                className="tooltip"
+                                data-tooltip="Archive"
+                              >
+                                <Archive onClick={() => handleArchive(item)} />
+                              </button>
+                            </li>
+                          </>
+                        ) : (
+                          <>
+                            <li>
+                              <button
+                                className="tooltip"
+                                data-tooltip="Restore"
+                              >
+                                <ArchiveRestore
+                                  onClick={() => handleRestore(item)}
+                                />
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                className="tooltip"
+                                data-tooltip="Delete"
+                                onClick={() => handleDelete(item)}
+                              >
+                                <Trash2 />
+                              </button>
+                            </li>
+                          </>
+                        )}
+                      </ul>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <LoadMore />
+        </div>
+      </div>
 
+      {store.isDelete && (
+        <ModalDelete
+          mysqlApiDelete={`/v2/question/${id}`}
+          queryKey="question"
+        />
+      )}
 
-                                        </ul>
-                                    </td> 
-                                </tr>
-                                ))}
-
-                                
-                                    
-
-                                </tbody>
-                            </table>
-                            <LoadMore/>
-                        </div>
-                        </div>
-        
-        {store.isDelete && <ModalDelete/>}
-        {store.isConfirm && <ModalConfirm/>}
+      {store.isConfirm && (
+        <ModalConfirm
+          queryKey="question"
+          mysqlApiArchive={`/v2/question/active/${id}`}
+          active={isActive}
+        />
+      )}
     </>
-  )
-}
+  );
+};
 
-export default QuestionTable
+export default QuestionTable;

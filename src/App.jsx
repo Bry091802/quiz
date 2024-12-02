@@ -3,17 +3,27 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Quiz from "./components/pages/frontend/Quiz";
 import Question from "./components/pages/backend/questions/Question";
 import { StoreProvider } from "./components/store/storeContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Welcome from "./components/pages/frontend/Welcome";
 
 const App = () => {
+  const queryClient = new QueryClient();
+
+
+
+
   return (
-    <StoreProvider>
-      <Router>
-        <Routes>
-          <Route index element={<Quiz />} />
-          <Route path="/admin/questions" element={<Question />} />
-        </Routes>
-      </Router>
-    </StoreProvider>
+    <QueryClientProvider client={queryClient}>
+      <StoreProvider>
+        <Router>
+          <Routes>
+            <Route index element={<Welcome />} />
+            <Route path="/quiz" element={<Quiz />} />
+            <Route path="/admin/questions" element={<Question />} />
+          </Routes>
+        </Router>
+      </StoreProvider>
+    </QueryClientProvider>
   );
 };
 

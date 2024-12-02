@@ -1,6 +1,5 @@
 import React from "react";
 
-
 const IconServerError = () => {
   return (
     <div className="flex flex-col items-center gap-2 py-20">
@@ -304,8 +303,4 @@ const IconServerError = () => {
   );
 };
 
-
 export default IconServerError;
-
-
-
